@@ -1,44 +1,88 @@
-import { Link, useLocation } from 'react-router-dom';
-import { useArticles } from '../context/ArticlesContext';
+import { Link, useLocation } from "react-router-dom";
+import { useArticles } from "../context/ArticlesContext";
+import { useAuth } from "../context/AuthContext";
 
 function Navigation() {
   const location = useLocation();
-  const { savedArticles } = useArticles();
+
+  const { getUserSavedArticles } = useArticles();
+  const savedCount = getUserSavedArticles().length;
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
 
   return (
     <nav>
       <div className="nav-container">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
           <h1 className="nav-brand">NewsReader</h1>
+
           <div className="nav-links">
-            <Link 
-              to="/" 
-              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            <Link
+              to="/"
+              className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
             >
               Home
             </Link>
-            <Link 
-              to="/search" 
-              className={`nav-link ${location.pathname === '/search' ? 'active' : ''}`}
+
+            <Link
+              to="/search"
+              className={`nav-link ${location.pathname === "/search" ? "active" : ""}`}
             >
               Search
             </Link>
-            {/* ⚠️ SECURITY ISSUE: No authentication required to access saved articles */}
-            <Link 
-              to="/saved" 
-              className={`nav-link ${location.pathname === '/saved' ? 'active' : ''}`}
+
+            <Link
+              to="/saved"
+              className={`nav-link ${location.pathname === "/saved" ? "active" : ""}`}
             >
-              Saved Articles ({savedArticles.length})
+              Saved Articles ({savedCount})
             </Link>
+
+            {isAuthenticated() && isAdmin() && (
+              <Link
+                to="/admin"
+                className={`nav-link ${location.pathname === "/admin" ? "active" : ""}`}
+              >
+                Admin
+              </Link>
+            )}
           </div>
         </div>
-        {/* ⚠️ SECURITY ISSUE: No login/logout functionality */}
+
         <div className="nav-user">
-          No authentication required
-        </div>
+          {isAuthenticated() ? (
+            <>
+              <span style={{ marginRight: "12px" }}>{user.username}</span>
+
+            {isAdmin() && (
+              <Link
+                to="/admin"
+                className={`nav-link ${location.pathname === "/admin" ? "active" : ""}`}
+                style={{ marginRight: "12px" }}
+              >
+                Admin
+              </Link>
+            )}
+
+            <button
+              onClick={logout}
+              className="nav-link"
+              style={{ border: "none", background: "none", cursor: "pointer" }}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/login"
+            className={`nav-link ${location.pathname === "/login" ? "active" : ""}`}
+          >
+            Login
+          </Link>
+        )}
       </div>
-    </nav>
+    </div>
+  </nav>
   );
-};
+}
 
 export default Navigation;
